@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang='jp'>
+  <head>
+    <meta charset='utf-8' />
+    <title>Points on a map</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css' rel='stylesheet' />
+    <style>
+      body { 
+        margin: 0; 
+        padding: 0; 
+      }
+      #map { 
+        position: absolute; 
+        top: 0; 
+        bottom: 0; 
+        width: 100%; 
+      }
+    </style>
+  </head>
+  <body>
+    <style>
+      .legend {
+      background-color: #4b4b4b;
+      border-radius: 3px;
+      bottom: 30px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      color: #ffffff;
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+      padding: 10px;
+      position: absolute;
+      right: 10px;
+      z-index: 1;
+      }
+       
+      .legend h4 {
+      margin: 0 0 10px;
+      }
+       
+      .legend div span {
+      border-radius: 50%;
+      display: inline-block;
+      height: 10px;
+      margin-right: 5px;
+      width: 10px;
+      }
+    </style>
+
+    <div id='map'></div>
+
+    <div id="legend" class="legend">
+      <h4>地価対前年変動率</h4>
+      <div><span style="background-color: #2670c5"></span>-4.8% to -2.0%</div>
+      <div><span style="background-color: #5cd6ff"></span>-2.0% to    0%</div>
+      <div><span style="background-color: #feefcd"></span>   0% to  2.0%</div>
+      <div><span style="background-color: #ff968f"></span> 2.0% to  4.0%</div>
+      <div><span style="background-color: #c31f13"></span> 6.8%</div>
+    </div>
+
+    <script>
+        // The value for 'accessToken' begins with 'pk...'
+        mapboxgl.accessToken = 'pk.eyJ1IjoieXBrIiwiYSI6ImNraG10amZsYzB3MHMycG51eXFuNHJiNGIifQ.VSGdWEE2IcRDQKfmo92fIw'; 
+        const map = new mapboxgl.Map({
+        container: 'map',
+        // Replace YOUR_STYLE_URL with your style URL.
+        style: 'mapbox://styles/ypk/cloz61xpz013o01pm5l2s3hs3', 
+        center: [138.63144704110886, 35.619729515051034],
+        zoom: 9.5
+        });
+
+        // Code from the next step will go here.
+        /* 
+        Add an event listener that runs
+        when a user clicks on the map element.
+        */
+        map.on('click', (event) => {
+            // If the user clicked on one of your markers, get its information.
+            const features = map.queryRenderedFeatures(event.point, {
+                layers: ['data-driven-circles'] // replace with your layer name
+            });
+            if (!features.length) {
+                return;
+            }
+            const feature = features[0];
+            /* 
+            Create a popup, specify its options 
+            and properties, and add it to the map.
+        */
+            const popup = new mapboxgl.Popup({ offset: [0, -15] })
+            .setLngLat(feature.geometry.coordinates)
+            .setHTML(
+                `<p> 調査価格：${feature.properties.L02_006}円/ｍ2</p>
+                <p> 対前年変動率：${feature.properties.L02_007}%</p>
+                <p> 基準地行政区域コード：${feature.properties.L02_020}</p>
+                <p> 基準地の地名：${feature.properties.L02_021}</p>
+                <p> 所在並びに地番：${feature.properties.L02_022}</p>
+                <p> 住居表示：${feature.properties.L02_023}</p>
+                <p> 地積：${feature.properties.L02_024}m2</p>
+                <p> 最寄り駅名：${feature.properties.L02_044}</p>
+                <p> 最寄り駅迄の道路距離：${feature.properties.L02_045}m</p>
+                <p> 2021年調査価格：${feature.properties.L02_093}円/m2</p>
+                <p> 2022年調査価格：${feature.properties.L02_094}円/m2</p>
+                <p> 2023年調査価格：${feature.properties.L02_095}円/m2</p>`
+
+            )
+            .addTo(map);
+        });
+        const legend = document.getElementById('legend');
+        legend.style.display = 'block';
+
+    </script>
+  </body>
+</html>
